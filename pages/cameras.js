@@ -142,34 +142,46 @@ export default function Cameras() {
                     <>
                       {/* REAL YouTube Live Stream Embed */}
                       <iframe
-                        src={`https://www.youtube.com/embed/${camera.youtubeId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=${camera.youtubeId}`}
+                        src={`https://www.youtube.com/embed/${camera.youtubeId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=${camera.youtubeId}&enablejsapi=1&playsinline=1`}
                         className="absolute inset-0 w-full h-full"
                         frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                         title={camera.name}
+                        loading="lazy"
                       />
+                      
+                      {/* Click overlay to unmute/interact */}
+                      <div 
+                        className="absolute inset-0 cursor-pointer z-5"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Opens full YouTube
+                          window.open(`https://www.youtube.com/watch?v=${camera.youtubeId}`, '_blank');
+                        }}
+                        title="Click to open full stream"
+                      ></div>
                       
                       {/* Overlay gradient for better text visibility */}
                       <div className="absolute inset-0 bg-gradient-to-t from-stone-900/50 via-transparent to-stone-900/50 pointer-events-none z-10"></div>
                       
                       {/* Recording indicator */}
                       {camera.recording && (
-                        <div className="absolute top-3 left-3 flex items-center gap-2 px-2 py-1 bg-red-500/90 backdrop-blur-sm rounded-md z-20">
+                        <div className="absolute top-3 left-3 flex items-center gap-2 px-2 py-1 bg-red-500/90 backdrop-blur-sm rounded-md z-20 pointer-events-none">
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                           <span className="text-xs font-medium text-white">● LIVE</span>
                         </div>
                       )}
                       
                       {/* Timestamp */}
-                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-stone-900/90 backdrop-blur-sm rounded-md z-20">
+                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-stone-900/90 backdrop-blur-sm rounded-md z-20 pointer-events-none">
                         <span className="text-xs font-mono text-white">
                           {new Date().toLocaleTimeString()} • {camera.name}
                         </span>
                       </div>
                       
                       {/* Camera ID */}
-                      <div className="absolute top-3 right-3 px-2 py-1 bg-stone-900/90 backdrop-blur-sm rounded-md z-20">
+                      <div className="absolute top-3 right-3 px-2 py-1 bg-stone-900/90 backdrop-blur-sm rounded-md z-20 pointer-events-none">
                         <span className="text-xs font-mono text-white">CAM-{camera.id.split('-')[1]}</span>
                       </div>
                       
@@ -178,9 +190,10 @@ export default function Cameras() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedCamera(selectedCamera?.id === camera.id ? null : camera);
+                            window.open(`https://www.youtube.com/watch?v=${camera.youtubeId}`, '_blank');
                           }}
                           className="p-1.5 bg-stone-900/90 backdrop-blur-sm rounded-md hover:bg-stone-800 transition-colors"
+                          title="Open full stream"
                         >
                           <Maximize2 className="w-4 h-4 text-white" />
                         </button>

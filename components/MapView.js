@@ -69,10 +69,51 @@ export default function MapView({ posts, userLocation }) {
 
   // Update markers when posts change
   useEffect(() => {
-    if (!markersLayer.current) return;
+    if (!markersLayer.current || !mapInstance.current) return;
 
     // Clear existing markers
     markersLayer.current.clearLayers();
+
+    // Add wheelchair accessible routes (blue paths)
+    const accessibleRoutes = [
+      // Main accessible route
+      [
+        [40.7128, -74.0060],
+        [40.7138, -74.0070],
+        [40.7148, -74.0040],
+      ],
+      // Park accessible path
+      [
+        [40.7118, -74.0050],
+        [40.7128, -74.0060],
+        [40.7108, -74.0080],
+      ],
+    ];
+
+    // Draw accessible routes as blue lines
+    accessibleRoutes.forEach(route => {
+      const polyline = L.polyline(route, {
+        color: '#3b82f6',
+        weight: 4,
+        opacity: 0.7,
+        dashArray: '10, 10',
+        className: 'accessible-route'
+      }).addTo(markersLayer.current);
+
+      polyline.bindPopup(`
+        <div style="padding: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-size: 20px;">♿</span>
+            <strong style="color: #1e40af;">Wheelchair Accessible Route</strong>
+          </div>
+          <div style="font-size: 12px; color: #64748b;">
+            <div>✓ Smooth pavement</div>
+            <div>✓ Curb ramps available</div>
+            <div>✓ Wide sidewalks</div>
+          </div>
+        </div>
+      `);
+    });
 
     // Add markers for each post
     posts.forEach(post => {

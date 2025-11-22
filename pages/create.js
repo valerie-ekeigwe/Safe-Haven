@@ -74,8 +74,9 @@ export default function CreatePost() {
     setTimeout(() => {
       toast.success('Post created successfully!');
       setLoading(false);
+      // REDIRECT TO FEED
       router.push('/feed');
-    }, 1500);
+    }, 1000);
   };
 
   const handleCancel = () => {

@@ -178,7 +178,7 @@ export default function Feed() {
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-stone-900 mb-2">Community feed</h1>
               <p className="text-stone-600">
-                Stay updated with what's happening in {userData?.neighborhood || 'your neighborhood'}
+                Stay updated with what&apos;s happening in {userData?.neighborhood || 'your neighborhood'}
               </p>
             </div>
 
