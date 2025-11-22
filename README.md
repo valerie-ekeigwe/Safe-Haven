@@ -2,7 +2,7 @@
 
 A modern, human-centered neighborhood watch and community safety application. Built with Next.js, Firebase, and React, featuring real-time updates, interactive maps, and accessibility-first design.
 
-## ✨ Features
+##  Features
 
 ### Core Features
 - **Community Feed** - Share and view real-time updates from your neighborhood
@@ -29,7 +29,7 @@ A modern, human-centered neighborhood watch and community safety application. Bu
 - Comment and engagement system
 - User profiles and settings
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Node.js 16.x or higher
@@ -76,7 +76,7 @@ npm run dev
 6. **Open your browser**
 Navigate to [http://localhost:3000](http://localhost:3000)
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 safe-haven/
@@ -104,7 +104,7 @@ safe-haven/
 
 ```
 
-## 🎨 Design Philosophy
+## Design Philosophy
 
 Safe Haven follows a MetaLab-inspired design approach:
 - **Clean & Purposeful** - Every element serves a function
@@ -118,7 +118,7 @@ Safe Haven follows a MetaLab-inspired design approach:
 - Amber (accent): Warmth and approachability
 - Category colors: Red (safety), Blue (pets), Green (events), etc.
 
-## 🔧 Configuration
+##  Configuration
 
 ### Firebase Security Rules
 
