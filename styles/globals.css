@@ -90,6 +90,56 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-stone-400;
   }
+  
+  /* Camera live feed animations */
+  @keyframes moveRight {
+    0% {
+      left: -10%;
+    }
+    100% {
+      left: 110%;
+    }
+  }
+  
+  @keyframes moveLeft {
+    0% {
+      right: -10%;
+    }
+    100% {
+      right: 110%;
+    }
+  }
+  
+  @keyframes walkRight {
+    0%, 100% {
+      left: 10%;
+      opacity: 0.3;
+    }
+    50% {
+      left: 40%;
+      opacity: 0.6;
+    }
+  }
+  
+  @keyframes walkLeft {
+    0%, 100% {
+      right: 10%;
+      opacity: 0.3;
+    }
+    50% {
+      right: 40%;
+      opacity: 0.6;
+    }
+  }
+  
+  @keyframes scan {
+    0% {
+      top: -100%;
+    }
+    100% {
+      top: 100%;
+    }
+  }
 }
 
 /* Leaflet map overrides */

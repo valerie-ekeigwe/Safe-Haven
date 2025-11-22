@@ -1,7 +1,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Shield, Home, Map, Bell, User, LogOut, Settings, Plus, Camera } from 'lucide-react';
+import { Shield, Home, Map, Bell, User, LogOut, Settings, Plus, Camera, Accessibility } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Layout({ children }) {
@@ -13,6 +13,7 @@ export default function Layout({ children }) {
     { name: 'Feed', href: '/feed', icon: Home },
     { name: 'Map', href: '/map', icon: Map },
     { name: 'Cameras', href: '/cameras', icon: Camera },
+    { name: 'Accessibility', href: '/accessibility', icon: Accessibility },
     { name: 'Alerts', href: '/alerts', icon: Bell },
   ];
 

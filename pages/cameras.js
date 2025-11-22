@@ -6,61 +6,67 @@ import { Camera, Video, Eye, MapPin, Clock, AlertCircle, Play, Pause, Maximize2 
 export default function Cameras() {
   const [selectedCamera, setSelectedCamera] = useState(null);
 
-  // Demo cameras - In production these would be real camera feeds
+  // Demo cameras - Now with REAL YouTube live streams!
   const cameras = [
     {
       id: 'cam-1',
-      name: 'Main Street Entrance',
-      location: 'Main St & 1st Ave',
+      name: 'Times Square NYC',
+      location: 'New York City',
       status: 'online',
       type: 'street',
-      lastUpdate: '2 mins ago',
+      lastUpdate: 'Live',
       recording: true,
+      youtubeId: 'eJ7jFFhuu9k', // EarthCam Times Square
     },
     {
       id: 'cam-2',
-      name: 'Park Playground',
-      location: 'Central Park',
+      name: 'Central Park View',
+      location: 'New York City',
       status: 'online',
       type: 'park',
-      lastUpdate: '1 min ago',
+      lastUpdate: 'Live',
       recording: true,
+      youtubeId: 'mCHw2S611TY', // Central Park live
     },
     {
       id: 'cam-3',
-      name: 'School Zone Camera',
-      location: 'Oakwood Elementary',
+      name: 'City Traffic Camera',
+      location: 'Downtown',
       status: 'online',
-      type: 'school',
-      lastUpdate: '30 secs ago',
+      type: 'street',
+      lastUpdate: 'Live',
       recording: true,
+      youtubeId: 'ydYDqZQpim8', // Traffic cam
     },
     {
       id: 'cam-4',
-      name: 'Community Center',
-      location: '456 Center St',
+      name: 'Beach Boardwalk',
+      location: 'Miami Beach',
       status: 'online',
       type: 'building',
-      lastUpdate: '1 min ago',
+      lastUpdate: 'Live',
       recording: true,
+      youtubeId: 'mfLXrlQs_rM', // Miami Beach
     },
     {
       id: 'cam-5',
-      name: 'Oak Street Corner',
-      location: 'Oak St & Maple Ave',
-      status: 'offline',
+      name: 'Downtown Plaza',
+      location: 'City Center',
+      status: 'online',
       type: 'street',
-      lastUpdate: '15 mins ago',
-      recording: false,
+      lastUpdate: 'Live',
+      recording: true,
+      youtubeId: 'dj_G1hl1fBo', // Live city cam
     },
     {
       id: 'cam-6',
-      name: 'Parking Lot View',
-      location: 'Community Parking',
+      name: 'Harbor View',
+      location: 'Waterfront',
       status: 'online',
       type: 'parking',
-      lastUpdate: '45 secs ago',
+      lastUpdate: 'Live',
       recording: true,
+      youtubeId: '8-EbqYLbfL8', // Harbor cam
     },
   ];
 
@@ -130,40 +136,52 @@ export default function Cameras() {
                     : 'border-stone-700 hover:border-stone-600'
                 }`}
               >
-                {/* Camera View */}
-                <div className="relative aspect-video bg-stone-900 flex items-center justify-center">
+                {/* Camera View - REAL YouTube Live Stream */}
+                <div className="relative aspect-video bg-stone-900 flex items-center justify-center overflow-hidden">
                   {camera.status === 'online' ? (
                     <>
-                      {/* Simulated camera feed */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-stone-800 to-stone-900">
-                        <div className="absolute inset-0 opacity-20">
-                          <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-stone-600 rounded-full blur-3xl animate-pulse"></div>
-                        </div>
-                      </div>
+                      {/* REAL YouTube Live Stream Embed */}
+                      <iframe
+                        src={`https://www.youtube.com/embed/${camera.youtubeId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=${camera.youtubeId}`}
+                        className="absolute inset-0 w-full h-full"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title={camera.name}
+                      />
                       
-                      {/* Camera overlay */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-6xl opacity-30">{getCameraIcon(camera.type)}</div>
-                      </div>
+                      {/* Overlay gradient for better text visibility */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-stone-900/50 via-transparent to-stone-900/50 pointer-events-none z-10"></div>
                       
                       {/* Recording indicator */}
                       {camera.recording && (
-                        <div className="absolute top-3 left-3 flex items-center gap-2 px-2 py-1 bg-red-500 rounded-md">
+                        <div className="absolute top-3 left-3 flex items-center gap-2 px-2 py-1 bg-red-500/90 backdrop-blur-sm rounded-md z-20">
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                          <span className="text-xs font-medium text-white">REC</span>
+                          <span className="text-xs font-medium text-white">● LIVE</span>
                         </div>
                       )}
                       
                       {/* Timestamp */}
-                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-stone-900/80 backdrop-blur-sm rounded-md">
+                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-stone-900/90 backdrop-blur-sm rounded-md z-20">
                         <span className="text-xs font-mono text-white">
-                          {new Date().toLocaleTimeString()}
+                          {new Date().toLocaleTimeString()} • {camera.name}
                         </span>
                       </div>
                       
+                      {/* Camera ID */}
+                      <div className="absolute top-3 right-3 px-2 py-1 bg-stone-900/90 backdrop-blur-sm rounded-md z-20">
+                        <span className="text-xs font-mono text-white">CAM-{camera.id.split('-')[1]}</span>
+                      </div>
+                      
                       {/* Expand button */}
-                      <div className="absolute bottom-3 right-3">
-                        <button className="p-1.5 bg-stone-900/80 backdrop-blur-sm rounded-md hover:bg-stone-800 transition-colors">
+                      <div className="absolute bottom-3 right-3 z-20">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCamera(selectedCamera?.id === camera.id ? null : camera);
+                          }}
+                          className="p-1.5 bg-stone-900/90 backdrop-blur-sm rounded-md hover:bg-stone-800 transition-colors"
+                        >
                           <Maximize2 className="w-4 h-4 text-white" />
                         </button>
                       </div>
