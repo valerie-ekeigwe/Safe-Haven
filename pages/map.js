@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Layout from '../components/Layout';
 import dynamic from 'next/dynamic';
 import { getPosts } from '../lib/db';
-import { Filter, Layers } from 'lucide-react';
+import { Filter, Layers, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // Dynamically import the map component to avoid SSR issues
@@ -13,8 +14,65 @@ const MapView = dynamic(() => import('../components/MapView'), { ssr: false });
 export default function Map() {
   const { user, userData } = useAuth();
   const router = useRouter();
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState([
+    // DEMO DATA with real locations (New York City area)
+    {
+      id: 'map-1',
+      userId: 'demo-user-1',
+      authorName: 'Sarah Johnson',
+      category: 'safety',
+      title: 'Broken Streetlight',
+      description: 'Streetlight on corner has been out for 3 days. Very dark at night.',
+      neighborhood: 'Downtown',
+      createdAt: new Date(),
+      location: { lat: 40.7128, lng: -74.0060 },
+    },
+    {
+      id: 'map-2',
+      userId: 'demo-user-2',
+      authorName: 'Mike Chen',
+      category: 'lost-pet',
+      title: 'Lost Cat',
+      description: 'Orange tabby cat missing. Answers to Whiskers.',
+      neighborhood: 'Downtown',
+      createdAt: new Date(),
+      location: { lat: 40.7138, lng: -74.0070 },
+    },
+    {
+      id: 'map-3',
+      userId: 'demo-user-3',
+      authorName: 'Lisa Martinez',
+      category: 'event',
+      title: 'Community BBQ',
+      description: 'Join us this Saturday at the park!',
+      neighborhood: 'Downtown',
+      createdAt: new Date(),
+      location: { lat: 40.7118, lng: -74.0050 },
+    },
+    {
+      id: 'map-4',
+      userId: 'demo-user-4',
+      authorName: 'John Smith',
+      category: 'accessibility',
+      title: 'Broken Ramp',
+      description: 'Wheelchair ramp has a large crack, needs repair.',
+      neighborhood: 'Downtown',
+      createdAt: new Date(),
+      location: { lat: 40.7148, lng: -74.0040 },
+    },
+    {
+      id: 'map-5',
+      userId: 'demo-user-5',
+      authorName: 'Emma Wilson',
+      category: 'question',
+      title: 'Best Plumber?',
+      description: 'Anyone know a good plumber in the area?',
+      neighborhood: 'Downtown',
+      createdAt: new Date(),
+      location: { lat: 40.7108, lng: -74.0080 },
+    },
+  ]);
+  const [loading, setLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
     safety: true,
     'lost-pet': true,
@@ -27,48 +85,19 @@ export default function Map() {
   const [timeRange, setTimeRange] = useState('all');
 
   useEffect(() => {
-    // DEMO MODE: Comment out login requirement for testing
-    // if (!user) {
-    //   router.push('/login');
-    //   return;
-    // }
-    
+    // DEMO MODE: No login required, using mock data above
     loadPosts();
-  }, [user, timeRange]);
+  }, [timeRange]);
 
   const loadPosts = async () => {
     try {
       setLoading(true);
-      const filters = {};
-      
-      if (userData?.neighborhood) {
-        filters.neighborhood = userData.neighborhood;
-      }
-
-      const fetchedPosts = await getPosts(filters);
-      
-      // Filter by time range
-      let filteredPosts = fetchedPosts;
-      if (timeRange !== 'all') {
-        const now = new Date();
-        const cutoff = new Date();
-        
-        if (timeRange === '24h') {
-          cutoff.setHours(now.getHours() - 24);
-        } else if (timeRange === '7d') {
-          cutoff.setDate(now.getDate() - 7);
-        } else if (timeRange === '30d') {
-          cutoff.setDate(now.getDate() - 30);
-        }
-        
-        filteredPosts = fetchedPosts.filter(post => new Date(post.createdAt) > cutoff);
-      }
-      
-      setPosts(filteredPosts);
+      // DEMO MODE: Just use the demo posts we already have
+      // Posts are already set in useState above
+      setLoading(false);
     } catch (error) {
       console.error('Error loading posts:', error);
       toast.error('Failed to load posts');
-    } finally {
       setLoading(false);
     }
   };
@@ -118,10 +147,10 @@ export default function Map() {
         </div>
 
         {/* Controls Overlay */}
-        <div className="absolute top-4 left-4 right-4 z-10 pointer-events-none">
+        <div className="absolute top-4 left-4 right-4 z-[1000] pointer-events-none">
           <div className="max-w-7xl mx-auto flex items-start justify-between gap-4">
             {/* Left side - Stats */}
-            <div className="card p-4 pointer-events-auto">
+            <div className="card p-4 pointer-events-auto shadow-lg">
               <div className="text-2xl font-bold text-stone-900 mb-1">
                 {filteredPosts.length}
               </div>
@@ -130,18 +159,26 @@ export default function Map() {
               </div>
             </div>
 
-            {/* Right side - Filters */}
-            <div className="space-y-2">
+            {/* Right side - Actions */}
+            <div className="space-y-2 flex flex-col items-end">
+              <Link 
+                href="/report" 
+                className="btn btn-primary pointer-events-auto shadow-lg"
+              >
+                <Camera className="w-4 h-4" />
+                Report Issue
+              </Link>
+              
               <button
                 onClick={() => setShowFilterPanel(!showFilterPanel)}
-                className="btn btn-secondary pointer-events-auto"
+                className="btn btn-secondary pointer-events-auto shadow-lg"
               >
                 <Filter className="w-4 h-4" />
                 Filters
               </button>
 
               {showFilterPanel && (
-                <div className="card p-4 space-y-4 pointer-events-auto">
+                <div className="card p-4 space-y-4 pointer-events-auto shadow-lg">
                   {/* Time Range */}
                   <div>
                     <div className="text-sm font-medium text-stone-700 mb-2">
@@ -194,8 +231,8 @@ export default function Map() {
         </div>
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
-          <div className="card p-4 pointer-events-auto">
+        <div className="absolute bottom-20 md:bottom-4 left-4 z-[1000] pointer-events-none">
+          <div className="card p-4 pointer-events-auto max-w-[200px]">
             <div className="flex items-center gap-2 mb-3">
               <Layers className="w-4 h-4 text-stone-600" />
               <span className="text-sm font-medium text-stone-700">Legend</span>
@@ -204,7 +241,7 @@ export default function Map() {
               {filterOptions.map((option) => (
                 activeFilters[option.id] && (
                   <div key={option.id} className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${option.color}`}></div>
+                    <div className={`w-3 h-3 rounded-full ${option.color} flex-shrink-0`}></div>
                     <span className="text-xs text-stone-600">{option.label}</span>
                   </div>
                 )

@@ -19,12 +19,12 @@ export default function MapView({ posts, userLocation }) {
   useEffect(() => {
     if (!mapContainer.current || mapInstance.current) return;
 
-    // Default center (can be updated based on user location)
-    const center = userLocation || { lat: 40.7128, lng: -74.0060 }; // NYC default
+    // Default center (New York City)
+    const center = userLocation || { lat: 40.7128, lng: -74.0060 };
 
     mapInstance.current = L.map(mapContainer.current).setView(
       [center.lat, center.lng],
-      13
+      14 // Closer zoom to see pins better
     );
 
     // Add tile layer (using CartoDB Positron for clean look)
