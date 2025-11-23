@@ -1,10 +1,22 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
-import { Camera, Video, Eye, MapPin, Clock, AlertCircle, Play, Pause, Maximize2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Camera, Video, Eye, MapPin, Clock, AlertCircle, Play, Pause, Maximize2, Flag } from 'lucide-react';
+import { posts } from '../lib/api';
+import toast from 'react-hot-toast';
 
 export default function Cameras() {
+  const { user, userData } = useAuth();
   const [selectedCamera, setSelectedCamera] = useState(null);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportCamera, setReportCamera] = useState(null);
+  const [reportData, setReportData] = useState({
+    title: '',
+    description: '',
+    urgency: 'medium',
+  });
+  const [submitting, setSubmitting] = useState(false);
 
   // Demo cameras with mix of real and simulated feeds
   const cameras = [
@@ -103,10 +115,16 @@ export default function Cameras() {
             </div>
             
             <div className="flex items-center gap-4">
-              <Link href="/report" className="btn btn-primary">
-                <Camera className="w-4 h-4" />
+              <button 
+                onClick={() => {
+                  setShowReportForm(true);
+                  setReportCamera(null);
+                }}
+                className="btn btn-primary"
+              >
+                <Flag className="w-4 h-4" />
                 Report Issue
-              </Link>
+              </button>
               
               <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-lg">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -324,12 +342,146 @@ export default function Cameras() {
         </div>
 
         {/* Floating Report Button (Mobile) */}
-        <Link
-          href="/report"
+        <button
+          onClick={() => {
+            setShowReportForm(true);
+            setReportCamera(null);
+          }}
           className="md:hidden fixed bottom-20 right-6 w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 z-40"
         >
-          <Camera className="w-7 h-7 text-white" />
-        </Link>
+          <Flag className="w-7 h-7 text-white" />
+        </button>
+
+        {/* Report Issue Modal */}
+        {showReportForm && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-stone-900">Report Camera Issue</h3>
+                    {reportCamera && (
+                      <p className="text-sm text-stone-600 mt-1">
+                        Camera: {reportCamera.name}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowReportForm(false);
+                      setReportData({ title: '', description: '', urgency: 'medium' });
+                    }}
+                    className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+                  >
+                    <AlertCircle className="w-5 h-5 text-stone-600" />
+                  </button>
+                </div>
+
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    
+                    if (!reportData.title || !reportData.description) {
+                      toast.error('Please fill in all fields');
+                      return;
+                    }
+
+                    setSubmitting(true);
+
+                    try {
+                      const postData = {
+                        userId: user?.id || 1,
+                        authorName: userData?.name || 'Anonymous User',
+                        category: 'safety',
+                        title: reportData.title,
+                        description: `${reportData.description}${reportCamera ? `\n\nReported from camera: ${reportCamera.name} (${reportCamera.location})` : ''}`,
+                        neighborhood: userData?.neighborhood || 'Downtown',
+                        latitude: 40.7128,
+                        longitude: -74.0060,
+                      };
+
+                      await posts.create(postData);
+                      
+                      toast.success('Issue reported successfully! 🚨');
+                      setShowReportForm(false);
+                      setReportData({ title: '', description: '', urgency: 'medium' });
+                    } catch (error) {
+                      console.error('Error reporting issue:', error);
+                      toast.error('Failed to report issue');
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                      Issue Title
+                    </label>
+                    <input
+                      type="text"
+                      value={reportData.title}
+                      onChange={(e) => setReportData({ ...reportData, title: e.target.value })}
+                      className="input w-full"
+                      placeholder="e.g., Suspicious activity detected"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      value={reportData.description}
+                      onChange={(e) => setReportData({ ...reportData, description: e.target.value })}
+                      className="input w-full min-h-[120px]"
+                      placeholder="Describe what you saw..."
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                      Urgency Level
+                    </label>
+                    <select
+                      value={reportData.urgency}
+                      onChange={(e) => setReportData({ ...reportData, urgency: e.target.value })}
+                      className="input w-full"
+                    >
+                      <option value="low">Low - Informational</option>
+                      <option value="medium">Medium - Needs Attention</option>
+                      <option value="high">High - Important</option>
+                      <option value="emergency">Emergency - Immediate Action Required</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowReportForm(false);
+                        setReportData({ title: '', description: '', urgency: 'medium' });
+                      }}
+                      className="btn btn-secondary flex-1"
+                      disabled={submitting}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary flex-1"
+                      disabled={submitting}
+                    >
+                      {submitting ? 'Submitting...' : 'Submit Report'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

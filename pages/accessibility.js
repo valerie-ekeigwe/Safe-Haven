@@ -97,25 +97,68 @@ export default function AccessibilityMode() {
     },
   ]);
 
-  // Voice announcements
+  // Voice announcements - COMPLETELY FIXED
   const speak = (text) => {
-    if (voiceEnabled && 'speechSynthesis' in window) {
+    if (!voiceEnabled) return;
+    
+    if (!('speechSynthesis' in window)) {
+      console.error('Speech synthesis not supported');
+      toast.error('Voice not supported in your browser');
+      return;
+    }
+
+    try {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      // Create utterance
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 1;
+      utterance.lang = 'en-US';
+      
+      // Error handling
+      utterance.onerror = (event) => {
+        console.error('Speech error:', event);
+      };
+      
+      utterance.onend = () => {
+        console.log('Speech finished');
+      };
+      
+      // Speak immediately
       window.speechSynthesis.speak(utterance);
+      console.log('Speaking:', text);
+      
+    } catch (error) {
+      console.error('Speech error:', error);
+      toast.error('Voice guidance error');
     }
   };
 
-  // Toggle voice
+  // Toggle voice - COMPLETELY FIXED
   const toggleVoice = () => {
     const newState = !voiceEnabled;
+    
+    // Stop any current speech
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
     setVoiceEnabled(newState);
     
     if (newState) {
-      speak('Voice guidance enabled. I will now read important information aloud.');
-      toast.success('Voice guidance enabled');
+      toast.success('Voice guidance enabled - Click "Test Voice" to verify');
+      
+      // Speak after a delay to ensure state is updated
+      setTimeout(() => {
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance('Voice guidance enabled. I will now read important information aloud.');
+          utterance.lang = 'en-US';
+          window.speechSynthesis.speak(utterance);
+        }
+      }, 300);
     } else {
       toast.success('Voice guidance disabled');
     }
@@ -190,6 +233,39 @@ export default function AccessibilityMode() {
             <h2 className={`text-lg font-semibold mb-4 ${highContrast ? 'text-white' : 'text-stone-900'}`}>
               Quick Settings
             </h2>
+            
+            {/* Voice Test Banner - Shows when voice is enabled */}
+            {voiceEnabled && (
+              <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-500 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Volume2 className="w-6 h-6 text-blue-600" />
+                    <div>
+                      <p className="font-semibold text-blue-900">Voice Guidance Active</p>
+                      <p className="text-sm text-blue-700">Click the button to test if voice is working</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const testText = 'This is a test. Voice guidance is working correctly. You should hear this message clearly.';
+                      if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const utterance = new SpeechSynthesisUtterance(testText);
+                        utterance.lang = 'en-US';
+                        utterance.rate = 0.9;
+                        window.speechSynthesis.speak(utterance);
+                        toast.success('Playing test message...');
+                      }
+                    }}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  >
+                    <Volume2 className="w-5 h-5" />
+                    Test Voice Now
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <div className="grid sm:grid-cols-2 gap-3">
               <button
                 onClick={toggleVoice}
