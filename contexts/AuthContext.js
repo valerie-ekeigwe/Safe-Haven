@@ -1,16 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendPasswordResetEmail,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
 import { useRouter } from 'next/router';
+import { auth as authAPI } from '../lib/api';
 
 const AuthContext = createContext({});
 
@@ -22,102 +12,73 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Check if user is logged in on mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        // Fetch additional user data from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          setUserData(userDoc.data());
-        }
-      } else {
-        setUser(null);
-        setUserData(null);
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
+      
+      if (token && savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        setUserData(parsedUser);
       }
+      
       setLoading(false);
-    });
+    };
 
-    return unsubscribe;
+    checkAuth();
   }, []);
 
-  const signup = async (email, password, additionalData) => {
+  // Sign up with email and password
+  const signup = async (email, password, name, neighborhood = 'Downtown') => {
     try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
+      const result = await authAPI.register(email, password, name, neighborhood);
       
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', result.user.uid), {
-        email: result.user.email,
-        ...additionalData,
-        createdAt: new Date().toISOString(),
-        verified: false,
-        role: 'user',
-      });
-
-      return result.user;
+      setUser(result.user);
+      setUserData(result.user);
+      
+      // Save to localStorage
+      localStorage.setItem('user', JSON.stringify(result.user));
+      
+      return result;
     } catch (error) {
+      console.error('Signup error:', error);
       throw error;
     }
   };
 
+  // Login with email and password
   const login = async (email, password) => {
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      return result.user;
+      const result = await authAPI.login(email, password);
+      
+      setUser(result.user);
+      setUserData(result.user);
+      
+      // Save to localStorage
+      localStorage.setItem('user', JSON.stringify(result.user));
+      
+      return result;
     } catch (error) {
+      console.error('Login error:', error);
       throw error;
     }
   };
 
-  const loginWithGoogle = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      
-      // Check if user document exists, if not create one
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, 'users', result.user.uid), {
-          email: result.user.email,
-          name: result.user.displayName,
-          photoURL: result.user.photoURL,
-          createdAt: new Date().toISOString(),
-          verified: false,
-          role: 'user',
-        });
-      }
-      
-      return result.user;
-    } catch (error) {
-      throw error;
-    }
-  };
-
+  // Logout
   const logout = async () => {
     try {
-      await signOut(auth);
+      authAPI.logout();
+      setUser(null);
+      setUserData(null);
+      
+      // Clear localStorage
+      localStorage.removeItem('user');
+      
       router.push('/');
     } catch (error) {
-      throw error;
-    }
-  };
-
-  const resetPassword = async (email) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const updateUserData = async (updates) => {
-    if (!user) return;
-    
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, updates, { merge: true });
-      setUserData(prev => ({ ...prev, ...updates }));
-    } catch (error) {
+      console.error('Logout error:', error);
       throw error;
     }
   };
@@ -128,15 +89,12 @@ export const AuthProvider = ({ children }) => {
     loading,
     signup,
     login,
-    loginWithGoogle,
     logout,
-    resetPassword,
-    updateUserData,
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

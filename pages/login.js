@@ -1,186 +1,226 @@
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { useAuth } from '../contexts/AuthContext';
-import { Shield, Mail, Lock, Chrome } from 'lucide-react';
+import { Shield, Mail, Lock, User, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Login() {
+  const { login, signup } = useAuth();
   const router = useRouter();
-  const { login, loginWithGoogle } = useAuth();
-  
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    name: '',
+    neighborhood: 'Downtown',
   });
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await login(formData.email, formData.password);
-      toast.success('Welcome back!');
-      router.push('/feed');
-    } catch (error) {
-      console.error('Login error:', error);
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-        toast.error('Invalid email or password');
-      } else {
-        toast.error('Failed to log in');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (isSignUp) {
+        // Sign up
+        if (!formData.name) {
+          toast.error('Please enter your name');
+          setLoading(false);
+          return;
+        }
 
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      await loginWithGoogle();
-      toast.success('Welcome back!');
-      router.push('/feed');
+        await signup(
+          formData.email,
+          formData.password,
+          formData.name,
+          formData.neighborhood
+        );
+
+        toast.success('Account created! Welcome to Safe Haven 🎉');
+        router.push('/feed');
+      } else {
+        // Login
+        await login(formData.email, formData.password);
+        toast.success('Welcome back! 👋');
+        router.push('/feed');
+      }
     } catch (error) {
-      console.error('Google login error:', error);
-      toast.error('Failed to sign in with Google');
+      console.error('Auth error:', error);
+      toast.error(error.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 flex">
-      {/* Left side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 text-stone-900 hover:text-stone-700">
-              <Shield className="w-6 h-6" />
-              <span className="text-xl font-semibold">Safe Haven</span>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center px-4">
+      <div className="max-w-md w-full">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-stone-900 rounded-2xl mb-4">
+            <Shield className="w-8 h-8 text-white" />
           </div>
+          <h1 className="text-3xl font-bold text-stone-900 mb-2">Safe Haven</h1>
+          <p className="text-stone-600">Your neighborhood's safety network</p>
+        </div>
 
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-stone-900 mb-2">
-              Welcome back
-            </h1>
+        {/* Form Card */}
+        <div className="card p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-stone-900 mb-2">
+              {isSignUp ? 'Create account' : 'Welcome back'}
+            </h2>
             <p className="text-stone-600">
-              Log in to your account to continue
+              {isSignUp
+                ? 'Join your neighborhood community'
+                : 'Sign in to continue'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name (Sign up only) */}
+            {isSignUp && (
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="input pl-10"
+                    placeholder="John Doe"
+                    required={isSignUp}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Email
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
                 <input
                   type="email"
-                  id="email"
-                  name="email"
                   value={formData.email}
-                  onChange={handleChange}
-                  required
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="input pl-10"
                   placeholder="you@example.com"
+                  required
                 />
               </div>
             </div>
 
+            {/* Password */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="password" className="block text-sm font-medium text-stone-700">
-                  Password
-                </label>
-                <Link href="/forgot-password" className="text-sm text-stone-600 hover:text-stone-900">
-                  Forgot?
-                </Link>
-              </div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
                 <input
                   type="password"
-                  id="password"
-                  name="password"
                   value={formData.password}
-                  onChange={handleChange}
-                  required
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="input pl-10"
-                  placeholder="Enter your password"
+                  placeholder="••••••••"
+                  required
                 />
               </div>
             </div>
 
+            {/* Neighborhood (Sign up only) */}
+            {isSignUp && (
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">
+                  Neighborhood
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                  <input
+                    type="text"
+                    value={formData.neighborhood}
+                    onChange={(e) =>
+                      setFormData({ ...formData, neighborhood: e.target.value })
+                    }
+                    className="input pl-10"
+                    placeholder="Downtown"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
               className="btn btn-primary w-full"
             >
-              {loading ? 'Logging in...' : 'Log in'}
-            </button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-stone-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-stone-50 text-stone-500">Or continue with</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="btn btn-secondary w-full"
-            >
-              <Chrome className="w-5 h-5" />
-              Google
+              {loading
+                ? 'Loading...'
+                : isSignUp
+                ? 'Create account'
+                : 'Sign in'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-stone-600">
-            Don't have an account?{' '}
-            <Link href="/signup" className="font-medium text-stone-900 hover:underline">
-              Sign up
-            </Link>
-          </p>
-        </div>
-      </div>
-
-      {/* Right side - Visual */}
-      <div className="hidden lg:flex flex-1 bg-stone-900 p-12 items-center justify-center">
-        <div className="max-w-md text-white">
-          <h2 className="text-3xl font-bold mb-4">
-            Stay connected with your community
-          </h2>
-          <p className="text-stone-300 mb-8">
-            Access real-time updates, neighborhood maps, and connect with 
-            verified neighbors in your area.
-          </p>
-          <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-white/10"></div>
-              <div>
-                <div className="h-3 bg-white/20 rounded w-24 mb-2"></div>
-                <div className="h-2 bg-white/10 rounded w-16"></div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="h-2 bg-white/10 rounded"></div>
-              <div className="h-2 bg-white/10 rounded w-4/5"></div>
-            </div>
+          {/* Toggle Sign Up / Login */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setFormData({
+                  email: '',
+                  password: '',
+                  name: '',
+                  neighborhood: 'Downtown',
+                });
+              }}
+              className="text-stone-600 hover:text-stone-900 text-sm"
+            >
+              {isSignUp
+                ? 'Already have an account? Sign in'
+                : 'Don&apos;t have an account? Sign up'}
+            </button>
           </div>
+
+          {/* Demo Account Info */}
+          {!isSignUp && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🎯 Quick Demo:
+              </p>
+              <p className="text-xs text-blue-700">
+                Create a new account or browse as guest by going to{' '}
+                <Link href="/feed" className="underline font-medium">
+                  /feed
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Back to Home */}
+        <div className="text-center mt-6">
+          <Link
+            href="/"
+            className="text-stone-600 hover:text-stone-900 text-sm font-medium"
+          >
+            ← Back to home
+          </Link>
         </div>
       </div>
     </div>

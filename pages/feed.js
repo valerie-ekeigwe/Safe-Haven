@@ -4,108 +4,82 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import PostCard from '../components/PostCard';
-import { getPosts } from '../lib/db';
 import { Filter, MapPin, TrendingUp } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { posts as postsAPI } from '../lib/api';
+
+// Accessibility context
+import { useAccessibility } from '../contexts/AccessibilityContext';
 
 export default function Feed() {
   const { user, userData } = useAuth();
   const router = useRouter();
-  
-  // Keep ALL posts in allPosts, never modify this
-  const [allPosts] = useState([
-    // DEMO DATA - Shows immediately without Firebase
-    {
-      id: '1',
-      userId: 'demo-user-1',
-      authorName: 'Sarah Johnson',
-      authorPhoto: null,
-      verified: true,
-      category: 'safety',
-      title: 'Suspicious Activity on Oak Street',
-      description: 'Saw someone trying car door handles around 2 AM last night. Already reported to police. Everyone please lock your cars!',
-      neighborhood: 'Downtown',
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      views: 45,
-      comments: 3,
-      helpful: 8,
-      location: { lat: 40.7128, lng: -74.0060 },
-      images: []
-    },
-    {
-      id: '2',
-      userId: 'demo-user-2',
-      authorName: 'Mike Chen',
-      authorPhoto: null,
-      verified: false,
-      category: 'lost-pet',
-      title: 'Lost Cat - Orange Tabby',
-      description: 'Our cat Whiskers went missing yesterday evening. Orange tabby with white paws. Very friendly. Please call if you see him!',
-      neighborhood: 'Downtown',
-      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-      views: 67,
-      comments: 5,
-      helpful: 12,
-      location: { lat: 40.7138, lng: -74.0070 },
-      images: []
-    },
-    {
-      id: '3',
-      userId: 'demo-user-3',
-      authorName: 'Lisa Martinez',
-      authorPhoto: null,
-      verified: true,
-      category: 'event',
-      title: 'Community BBQ This Saturday',
-      description: 'Join us for our annual neighborhood BBQ at the park! Starts at noon. Bring your favorite dish to share. All are welcome!',
-      neighborhood: 'Downtown',
-      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-      views: 123,
-      comments: 15,
-      helpful: 34,
-      location: { lat: 40.7118, lng: -74.0050 },
-      images: []
-    },
-    {
-      id: '4',
-      userId: 'demo-user-4',
-      authorName: 'John Smith',
-      authorPhoto: null,
-      verified: false,
-      category: 'question',
-      title: 'Recommendations for Local Plumber?',
-      description: 'Need a reliable plumber for a leak repair. Any recommendations?',
-      neighborhood: 'Downtown',
-      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-      views: 34,
-      comments: 8,
-      helpful: 5,
-      location: { lat: 40.7108, lng: -74.0080 },
-      images: []
-    },
-    {
-      id: '5',
-      userId: 'demo-user-5',
-      authorName: 'Emma Wilson',
-      authorPhoto: null,
-      verified: true,
-      category: 'accessibility',
-      title: 'Broken Wheelchair Ramp',
-      description: 'The wheelchair ramp at Main Street library has a large crack. Needs repair urgently.',
-      neighborhood: 'Downtown',
-      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-      views: 89,
-      comments: 12,
-      helpful: 23,
-      location: { lat: 40.7148, lng: -74.0040 },
-      images: []
-    }
-  ]);
-  
-  const [loading, setLoading] = useState(false);
+
+  // Accessibility mode from context
+  const { accessibilityMode, toggleAccessibility } = useAccessibility();
+
+  // FIXED: Keep ALL posts in allPosts, never modify this
+  const [allPosts, setAllPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
 
-  // Computed filtered posts based on activeFilter
+  // Load posts from backend on mount
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = async () => {
+    try {
+      setLoading(true);
+      const data = await postsAPI.getAll();
+      
+      // Convert database format to component format
+      const formattedPosts = data.map(post => ({
+        id: post.id.toString(),
+        userId: post.user_id.toString(),
+        authorName: post.author_name,
+        authorPhoto: null,
+        verified: false,
+        category: post.category,
+        title: post.title,
+        description: post.description,
+        neighborhood: post.neighborhood,
+        createdAt: new Date(post.created_at),
+        views: post.views,
+        comments: 0,
+        helpful: post.helpful,
+        location: { lat: post.latitude, lng: post.longitude },
+        images: [],
+      }));
+      
+      setAllPosts(formattedPosts);
+    } catch (error) {
+      console.error('Error loading posts:', error);
+      // Fall back to demo data if backend fails
+      setAllPosts([
+        {
+          id: '1',
+          userId: 'demo-user-1',
+          authorName: 'Sarah Johnson',
+          authorPhoto: null,
+          verified: true,
+          category: 'safety',
+          title: 'Suspicious Activity on Oak Street',
+          description: 'Saw someone trying car door handles around 2 AM last night. Already reported to police. Everyone please lock your cars!',
+          neighborhood: 'Downtown',
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          views: 45,
+          comments: 3,
+          helpful: 8,
+          location: { lat: 40.7128, lng: -74.006 },
+          images: [],
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // FIXED: Computed filtered posts based on activeFilter
   const filteredPosts = activeFilter === 'all' 
     ? allPosts 
     : allPosts.filter(post => post.category === activeFilter);
@@ -121,7 +95,12 @@ export default function Feed() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Accessibility wrapper */}
+      <div
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${
+          accessibilityMode ? 'text-lg font-semibold leading-relaxed' : ''
+        }`}
+      >
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Sidebar */}
           <aside className="hidden lg:block lg:col-span-3">
@@ -163,7 +142,7 @@ export default function Feed() {
                 </div>
               </div>
 
-              {/* Quick Stats */}
+              {/* Quick Stats - FIXED: Use allPosts.length */}
               <div className="card p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <TrendingUp className="w-5 h-5 text-stone-600" />
@@ -180,16 +159,37 @@ export default function Feed() {
                   </div>
                 </div>
               </div>
+
+              {/* Accessibility Toggle */}
+              <div className="card p-6">
+                <h3 className="font-semibold text-stone-900 mb-4">Accessibility</h3>
+                <button
+                  onClick={toggleAccessibility}
+                  className={`w-full py-2 px-3 rounded-lg font-medium transition-colors ${
+                    accessibilityMode
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-stone-200 text-stone-800 hover:bg-stone-300'
+                  }`}
+                >
+                  {accessibilityMode ? 'Accessibility Mode: ON' : 'Accessibility Mode: OFF'}
+                </button>
+              </div>
             </div>
           </aside>
 
           {/* Main Content */}
           <main className="lg:col-span-9">
-            {/* Header */}
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-stone-900 mb-2">Community feed</h1>
+              <h1
+                className={`text-2xl font-bold text-stone-900 mb-2 ${
+                  accessibilityMode ? 'text-3xl' : ''
+                }`}
+              >
+                Community feed
+              </h1>
               <p className="text-stone-600">
-                Stay updated with what's happening in {userData?.neighborhood || 'your neighborhood'}
+                Stay updated with what&apos;s happening in{' '}
+                {userData?.neighborhood || 'your neighborhood'}
               </p>
             </div>
 
@@ -212,18 +212,14 @@ export default function Feed() {
               </div>
             </div>
 
-            {/* Create Post Button */}
-            <Link
-              href="/create"
-              className="btn btn-primary w-full mb-6"
-            >
+            {/* Create Post */}
+            <Link href="/create" className="btn btn-primary w-full mb-6">
               Create post
             </Link>
 
-            {/* Posts */}
+            {/* Posts - FIXED: Use filteredPosts */}
             <div className="space-y-4">
               {loading ? (
-                // Loading skeletons
                 <>
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="card p-6 animate-pulse">
@@ -242,29 +238,23 @@ export default function Feed() {
                   ))}
                 </>
               ) : filteredPosts.length === 0 ? (
-                // Empty state
                 <div className="card p-12 text-center">
                   <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <MapPin className="w-8 h-8 text-stone-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-stone-900 mb-2">
-                    No posts in this category
-                  </h3>
+                  <h3 className="text-lg font-semibold text-stone-900 mb-2">No posts in this category</h3>
                   <p className="text-stone-600 mb-6">
                     Try selecting a different filter or create a new post
                   </p>
-                  <button
-                    onClick={() => setActiveFilter('all')}
+                  <button 
+                    onClick={() => setActiveFilter('all')} 
                     className="btn btn-secondary"
                   >
                     Show all posts
                   </button>
                 </div>
               ) : (
-                // Posts list
-                filteredPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))
+                filteredPosts.map((post) => <PostCard key={post.id} post={post} />)
               )}
             </div>
           </main>

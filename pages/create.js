@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import { X, MapPin, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { posts } from '../lib/api';
 
 export default function CreatePost() {
   const router = useRouter();
+  const { user, userData } = useAuth();
+  
   const [formData, setFormData] = useState({
     category: 'safety',
     title: '',
@@ -63,6 +67,11 @@ export default function CreatePost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!formData.title.trim()) {
+      toast.error('Please add a title');
+      return;
+    }
+    
     if (!formData.description.trim()) {
       toast.error('Please add a description');
       return;
@@ -70,13 +79,35 @@ export default function CreatePost() {
 
     setLoading(true);
 
-    // Simulate saving (in production, this would save to Firebase)
-    setTimeout(() => {
-      toast.success('Post created successfully!');
+    try {
+      // Create post data
+      const postData = {
+        userId: user?.id || 1, // Use logged-in user ID or default to 1
+        authorName: userData?.name || 'Anonymous User',
+        category: formData.category,
+        title: formData.title,
+        description: formData.description,
+        neighborhood: userData?.neighborhood || 'Downtown',
+        latitude: 40.7128, // TODO: Get user's actual location
+        longitude: -74.0060,
+      };
+
+      // Save to backend
+      const result = await posts.create(postData);
+      
+      toast.success('Post created successfully! 🎉');
+      
+      // Redirect to feed
+      setTimeout(() => {
+        router.push('/feed');
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast.error(error.message || 'Failed to create post');
+    } finally {
       setLoading(false);
-      // REDIRECT TO FEED
-      router.push('/feed');
-    }, 1000);
+    }
   };
 
   const handleCancel = () => {

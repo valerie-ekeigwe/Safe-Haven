@@ -8,6 +8,9 @@ export default function Layout({ children }) {
   const { user, userData, logout } = useAuth();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  // Large text toggle
+  const [largeText, setLargeText] = useState(false);
 
   const navigation = [
     { name: 'Feed', href: '/feed', icon: Home },
@@ -20,7 +23,7 @@ export default function Layout({ children }) {
   const isActive = (path) => router.pathname === path;
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className={`min-h-screen bg-stone-50 ${largeText ? 'text-xl' : ''}`}>
       {/* Top Navigation */}
       <nav className="bg-white border-b border-stone-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -54,6 +57,19 @@ export default function Layout({ children }) {
 
             {/* User Menu */}
             <div className="flex items-center gap-3">
+              {/* Large Text Toggle */}
+              <button
+                onClick={() => setLargeText(!largeText)}
+                className={`p-2 rounded-lg transition-colors ${
+                  largeText 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                }`}
+                title={largeText ? 'Normal text' : 'Large text'}
+              >
+                <Accessibility className="w-5 h-5" />
+              </button>
+
               <Link href="/create" className="btn btn-primary hidden sm:flex">
                 <Plus className="w-4 h-4" />
                 Create
