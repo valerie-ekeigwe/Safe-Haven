@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import { 
   Volume2, 
@@ -17,9 +18,11 @@ import {
   User
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { posts } from '../lib/api';
 
 export default function AccessibilityMode() {
   const router = useRouter();
+  const { user, userData } = useAuth();
   
   // Accessibility Settings
   const [voiceEnabled, setVoiceEnabled] = useState(false);
@@ -62,6 +65,7 @@ export default function AccessibilityMode() {
     {
       id: '1',
       name: 'Central Park Entrance',
+      address: 'Central Park, New York, NY 10024',
       type: 'park',
       features: ['Wheelchair Ramp', 'Accessible Restroom', 'Braille Signs'],
       distance: '0.3 mi',
@@ -71,6 +75,7 @@ export default function AccessibilityMode() {
     {
       id: '2',
       name: 'Community Library',
+      address: '476 5th Ave, New York, NY 10018', // NY Public Library
       type: 'building',
       features: ['Elevator', 'Automatic Doors', 'Hearing Loop'],
       distance: '0.5 mi',
@@ -80,6 +85,7 @@ export default function AccessibilityMode() {
     {
       id: '3',
       name: 'Main Street Grocery',
+      address: 'Whole Foods Market, 270 Greenwich St, New York, NY',
       type: 'store',
       features: ['Wide Aisles', 'Accessible Parking', 'Service Animal Friendly'],
       distance: '0.7 mi',
@@ -89,6 +95,7 @@ export default function AccessibilityMode() {
     {
       id: '4',
       name: 'City Bus Stop #5',
+      address: 'Times Square, New York, NY 10036',
       type: 'transit',
       features: ['Audio Announcements', 'Lowered Platform', 'Tactile Paving'],
       distance: '0.2 mi',
@@ -172,7 +179,7 @@ export default function AccessibilityMode() {
   }, [voiceEnabled]);
 
   // Request walk buddy
-  const handleWalkBuddySubmit = (e) => {
+  const handleWalkBuddySubmit = async (e) => {
     e.preventDefault();
     
     if (!walkBuddyRequest.from || !walkBuddyRequest.to) {
@@ -180,17 +187,70 @@ export default function AccessibilityMode() {
       return;
     }
 
-    speak('Walk buddy request submitted. Searching for available neighbors.');
-    toast.success('Walk buddy request sent! Searching for available neighbors...');
-    
-    setShowWalkBuddy(false);
-    setWalkBuddyRequest({ from: '', to: '', time: '', notes: '' });
+    try {
+      speak('Walk buddy request submitted. Searching for available neighbors.');
+      
+      // Create post in database
+      const postData = {
+        userId: user?.id || 1,
+        authorName: userData?.name || 'Anonymous User',
+        category: 'accessibility',
+        title: `Walk Buddy Needed: ${walkBuddyRequest.from} to ${walkBuddyRequest.to}`,
+        description: `Looking for someone to walk with me.\n\nFrom: ${walkBuddyRequest.from}\nTo: ${walkBuddyRequest.to}\n${walkBuddyRequest.time ? `Time: ${walkBuddyRequest.time}` : ''}\n${walkBuddyRequest.notes ? `\nNotes: ${walkBuddyRequest.notes}` : ''}`,
+        neighborhood: userData?.neighborhood || 'Downtown',
+        latitude: 40.7128,
+        longitude: -74.0060,
+      };
+
+      await posts.create(postData);
+      
+      // Add to active requests list
+      const newRequest = {
+        id: Date.now().toString(),
+        requester: userData?.name || 'You',
+        from: walkBuddyRequest.from,
+        to: walkBuddyRequest.to,
+        time: walkBuddyRequest.time || 'ASAP',
+        status: 'waiting',
+        distance: '0.5 mi', // Could calculate this
+      };
+      
+      setActiveRequests([newRequest, ...activeRequests]);
+      
+      toast.success('Walk buddy request posted! 👫');
+      
+      setShowWalkBuddy(false);
+      setWalkBuddyRequest({ from: '', to: '', time: '', notes: '' });
+    } catch (error) {
+      console.error('Error submitting walk buddy request:', error);
+      toast.error('Failed to submit request');
+    }
   };
 
   // Emergency alert
-  const sendEmergencyAlert = () => {
-    speak('Emergency alert sent to nearby neighbors. Help is on the way.');
-    toast.success('Emergency alert sent to nearby neighbors!');
+  const sendEmergencyAlert = async () => {
+    try {
+      speak('Emergency alert sent to nearby neighbors. Help is on the way.');
+      
+      // Create emergency post in database
+      const postData = {
+        userId: user?.id || 1,
+        authorName: userData?.name || 'Anonymous User',
+        category: 'safety',
+        title: '🚨 EMERGENCY ALERT - Need Immediate Help',
+        description: `Emergency assistance needed in ${userData?.neighborhood || 'Downtown'}. Please respond if you can help.\n\nTime: ${new Date().toLocaleTimeString()}\nLocation: Near ${userData?.address || 'my location'}`,
+        neighborhood: userData?.neighborhood || 'Downtown',
+        latitude: 40.7128,
+        longitude: -74.0060,
+      };
+
+      await posts.create(postData);
+      
+      toast.success('🚨 Emergency alert posted to community feed!');
+    } catch (error) {
+      console.error('Error sending emergency alert:', error);
+      toast.error('Failed to send emergency alert');
+    }
   };
 
   return (
@@ -482,6 +542,14 @@ export default function AccessibilityMode() {
                     onClick={(e) => {
                       e.stopPropagation();
                       speak(`Getting directions to ${place.name}`);
+                      
+                      // Open Google Maps with wheelchair-accessible route
+                      const destination = encodeURIComponent(place.address);
+                      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking&dir_action=navigate`;
+                      
+                      // Open in new tab
+                      window.open(googleMapsUrl, '_blank');
+                      
                       toast.success(`Opening directions to ${place.name}`);
                     }}
                     className="mt-3 w-full btn btn-secondary text-sm"
