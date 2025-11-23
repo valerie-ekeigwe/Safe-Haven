@@ -6,7 +6,7 @@ import { Camera, Video, Eye, MapPin, Clock, AlertCircle, Play, Pause, Maximize2 
 export default function Cameras() {
   const [selectedCamera, setSelectedCamera] = useState(null);
 
-  // Demo cameras - Now with REAL YouTube live streams!
+  // Demo cameras with mix of real and simulated feeds
   const cameras = [
     {
       id: 'cam-1',
@@ -16,7 +16,8 @@ export default function Cameras() {
       type: 'street',
       lastUpdate: 'Live',
       recording: true,
-      youtubeId: 'eJ7jFFhuu9k', // EarthCam Times Square
+      youtubeId: 'rnXIjl_Rzy4', // Working Times Square stream
+      isReal: true,
     },
     {
       id: 'cam-2',
@@ -26,7 +27,7 @@ export default function Cameras() {
       type: 'park',
       lastUpdate: 'Live',
       recording: true,
-      youtubeId: 'mCHw2S611TY', // Central Park live
+      isReal: false, // Simulated
     },
     {
       id: 'cam-3',
@@ -36,7 +37,7 @@ export default function Cameras() {
       type: 'street',
       lastUpdate: 'Live',
       recording: true,
-      youtubeId: 'ydYDqZQpim8', // Traffic cam
+      isReal: false, // Simulated
     },
     {
       id: 'cam-4',
@@ -46,7 +47,7 @@ export default function Cameras() {
       type: 'building',
       lastUpdate: 'Live',
       recording: true,
-      youtubeId: 'mfLXrlQs_rM', // Miami Beach
+      isReal: false, // Simulated
     },
     {
       id: 'cam-5',
@@ -56,7 +57,7 @@ export default function Cameras() {
       type: 'street',
       lastUpdate: 'Live',
       recording: true,
-      youtubeId: 'dj_G1hl1fBo', // Live city cam
+      isReal: false, // Simulated
     },
     {
       id: 'cam-6',
@@ -66,7 +67,7 @@ export default function Cameras() {
       type: 'parking',
       lastUpdate: 'Live',
       recording: true,
-      youtubeId: '8-EbqYLbfL8', // Harbor cam
+      isReal: false, // Simulated
     },
   ];
 
@@ -136,34 +137,84 @@ export default function Cameras() {
                     : 'border-stone-700 hover:border-stone-600'
                 }`}
               >
-                {/* Camera View - REAL YouTube Live Stream */}
+                {/* Camera View - Real or Simulated */}
                 <div className="relative aspect-video bg-stone-900 flex items-center justify-center overflow-hidden">
                   {camera.status === 'online' ? (
                     <>
-                      {/* REAL YouTube Live Stream Embed */}
-                      <iframe
-                        src={`https://www.youtube.com/embed/${camera.youtubeId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=${camera.youtubeId}&enablejsapi=1&playsinline=1`}
-                        className="absolute inset-0 w-full h-full"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        title={camera.name}
-                        loading="lazy"
-                      />
-                      
-                      {/* Click overlay to unmute/interact */}
-                      <div 
-                        className="absolute inset-0 cursor-pointer z-5"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Opens full YouTube
-                          window.open(`https://www.youtube.com/watch?v=${camera.youtubeId}`, '_blank');
-                        }}
-                        title="Click to open full stream"
-                      ></div>
-                      
-                      {/* Overlay gradient for better text visibility */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-stone-900/50 via-transparent to-stone-900/50 pointer-events-none z-10"></div>
+                      {camera.isReal ? (
+                        // REAL YouTube Stream
+                        <>
+                          <iframe
+                            src={`https://www.youtube.com/embed/${camera.youtubeId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playsinline=1`}
+                            className="absolute inset-0 w-full h-full"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            title={camera.name}
+                          />
+                          
+                          {/* Overlay gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-stone-900/50 via-transparent to-stone-900/50 pointer-events-none z-10"></div>
+                        </>
+                      ) : (
+                        // SIMULATED Feed
+                        <>
+                          <div className="absolute inset-0">
+                            <div className={`absolute inset-0 ${
+                              camera.type === 'street' ? 'bg-gradient-to-b from-blue-900 to-stone-800' :
+                              camera.type === 'park' ? 'bg-gradient-to-b from-green-900 to-stone-800' :
+                              camera.type === 'building' ? 'bg-gradient-to-b from-gray-900 to-stone-900' :
+                              'bg-gradient-to-b from-stone-800 to-stone-900'
+                            }`}>
+                              <div className="absolute inset-0 opacity-40">
+                                {camera.type === 'street' && (
+                                  <>
+                                    <div className="absolute top-1/3 left-0 w-16 h-3 bg-yellow-400 rounded-full blur-md animate-[moveRight_8s_linear_infinite]"></div>
+                                    <div className="absolute top-2/3 right-0 w-16 h-3 bg-red-400 rounded-full blur-md animate-[moveLeft_6s_linear_infinite]"></div>
+                                  </>
+                                )}
+                                
+                                {(camera.type === 'park' || camera.type === 'building') && (
+                                  <>
+                                    <div className="absolute bottom-1/4 left-1/4 w-8 h-20 bg-stone-700 rounded-full blur-lg animate-[walkRight_12s_ease-in-out_infinite]"></div>
+                                    <div className="absolute bottom-1/4 right-1/3 w-8 h-20 bg-stone-700 rounded-full blur-lg animate-[walkLeft_15s_ease-in-out_infinite]"></div>
+                                  </>
+                                )}
+                                
+                                <div className="absolute top-0 right-1/4 w-6 h-6 bg-yellow-300 rounded-full blur-xl animate-pulse opacity-50"></div>
+                                <div className="absolute top-0 left-1/4 w-6 h-6 bg-yellow-300 rounded-full blur-xl animate-pulse opacity-40" style={{animationDelay: '1.5s'}}></div>
+                              </div>
+                              
+                              <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-stone-950 to-transparent"></div>
+                              
+                              {camera.type === 'street' && (
+                                <>
+                                  <div className="absolute bottom-0 left-1/4 w-20 h-40 bg-stone-950 opacity-80"></div>
+                                  <div className="absolute bottom-0 right-1/3 w-24 h-48 bg-stone-950 opacity-80"></div>
+                                </>
+                              )}
+                              
+                              {camera.type === 'park' && (
+                                <>
+                                  <div className="absolute bottom-0 left-1/4 w-16 h-32 bg-green-950 rounded-t-full opacity-70"></div>
+                                  <div className="absolute bottom-0 right-1/4 w-20 h-40 bg-green-950 rounded-t-full opacity-70"></div>
+                                </>
+                              )}
+                              
+                              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white to-transparent opacity-5 animate-[scan_3s_linear_infinite]"></div>
+                            </div>
+                          </div>
+                          
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="text-6xl opacity-20">{getCameraIcon(camera.type)}</div>
+                          </div>
+                          
+                          {/* Demo indicator for simulated feeds */}
+                          <div className="absolute top-12 left-3 px-2 py-1 bg-amber-500/90 backdrop-blur-sm rounded-md z-20 pointer-events-none">
+                            <span className="text-xs font-medium text-white">DEMO FEED</span>
+                          </div>
+                        </>
+                      )}
                       
                       {/* Recording indicator */}
                       {camera.recording && (
@@ -190,10 +241,14 @@ export default function Cameras() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            window.open(`https://www.youtube.com/watch?v=${camera.youtubeId}`, '_blank');
+                            if (camera.isReal) {
+                              window.open(`https://www.youtube.com/watch?v=${camera.youtubeId}`, '_blank');
+                            } else {
+                              setSelectedCamera(selectedCamera?.id === camera.id ? null : camera);
+                            }
                           }}
                           className="p-1.5 bg-stone-900/90 backdrop-blur-sm rounded-md hover:bg-stone-800 transition-colors"
-                          title="Open full stream"
+                          title={camera.isReal ? "Open full stream" : "View fullscreen"}
                         >
                           <Maximize2 className="w-4 h-4 text-white" />
                         </button>
