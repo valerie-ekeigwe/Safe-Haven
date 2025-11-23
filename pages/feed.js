@@ -11,7 +11,9 @@ import toast from 'react-hot-toast';
 export default function Feed() {
   const { user, userData } = useAuth();
   const router = useRouter();
-  const [posts, setPosts] = useState([
+  
+  // Keep ALL posts in allPosts, never modify this
+  const [allPosts] = useState([
     // DEMO DATA - Shows immediately without Firebase
     {
       id: '1',
@@ -63,41 +65,50 @@ export default function Feed() {
       helpful: 34,
       location: { lat: 40.7118, lng: -74.0050 },
       images: []
+    },
+    {
+      id: '4',
+      userId: 'demo-user-4',
+      authorName: 'John Smith',
+      authorPhoto: null,
+      verified: false,
+      category: 'question',
+      title: 'Recommendations for Local Plumber?',
+      description: 'Need a reliable plumber for a leak repair. Any recommendations?',
+      neighborhood: 'Downtown',
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+      views: 34,
+      comments: 8,
+      helpful: 5,
+      location: { lat: 40.7108, lng: -74.0080 },
+      images: []
+    },
+    {
+      id: '5',
+      userId: 'demo-user-5',
+      authorName: 'Emma Wilson',
+      authorPhoto: null,
+      verified: true,
+      category: 'accessibility',
+      title: 'Broken Wheelchair Ramp',
+      description: 'The wheelchair ramp at Main Street library has a large crack. Needs repair urgently.',
+      neighborhood: 'Downtown',
+      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+      views: 89,
+      comments: 12,
+      helpful: 23,
+      location: { lat: 40.7148, lng: -74.0040 },
+      images: []
     }
   ]);
+  
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
-  const [showCreatePost, setShowCreatePost] = useState(false);
 
-  useEffect(() => {
-    // DEMO MODE: No login required, using mock data above
-    loadPosts();
-  }, [activeFilter]);
-
-  const loadPosts = async () => {
-    try {
-      setLoading(true);
-      // DEMO MODE: Filter mock data instead of fetching from Firebase
-      const allPosts = posts;
-      
-      let filteredPosts = allPosts;
-      if (activeFilter !== 'all') {
-        filteredPosts = allPosts.filter(post => post.category === activeFilter);
-      }
-      
-      setPosts(filteredPosts);
-    } catch (error) {
-      console.error('Error loading posts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePostCreated = () => {
-    setShowCreatePost(false);
-    loadPosts();
-    toast.success('Post created successfully!');
-  };
+  // Computed filtered posts based on activeFilter
+  const filteredPosts = activeFilter === 'all' 
+    ? allPosts 
+    : allPosts.filter(post => post.category === activeFilter);
 
   const filters = [
     { id: 'all', label: 'All' },
@@ -160,7 +171,7 @@ export default function Feed() {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <div className="text-2xl font-bold text-stone-900">{posts.length}</div>
+                    <div className="text-2xl font-bold text-stone-900">{allPosts.length}</div>
                     <div className="text-sm text-stone-600">Posts this week</div>
                   </div>
                   <div>
@@ -178,7 +189,7 @@ export default function Feed() {
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-stone-900 mb-2">Community feed</h1>
               <p className="text-stone-600">
-                Stay updated with what&apos;s happening in {userData?.neighborhood || 'your neighborhood'}
+                Stay updated with what's happening in {userData?.neighborhood || 'your neighborhood'}
               </p>
             </div>
 
@@ -230,29 +241,29 @@ export default function Feed() {
                     </div>
                   ))}
                 </>
-              ) : posts.length === 0 ? (
+              ) : filteredPosts.length === 0 ? (
                 // Empty state
                 <div className="card p-12 text-center">
                   <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <MapPin className="w-8 h-8 text-stone-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-stone-900 mb-2">
-                    No posts yet
+                    No posts in this category
                   </h3>
                   <p className="text-stone-600 mb-6">
-                    Be the first to share something with your neighborhood
+                    Try selecting a different filter or create a new post
                   </p>
                   <button
-                    onClick={() => setShowCreatePost(true)}
-                    className="btn btn-primary"
+                    onClick={() => setActiveFilter('all')}
+                    className="btn btn-secondary"
                   >
-                    Create first post
+                    Show all posts
                   </button>
                 </div>
               ) : (
                 // Posts list
-                posts.map((post) => (
-                  <PostCard key={post.id} post={post} onUpdate={loadPosts} />
+                filteredPosts.map((post) => (
+                  <PostCard key={post.id} post={post} />
                 ))
               )}
             </div>
