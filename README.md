@@ -1,199 +1,158 @@
-Safe Haven
-A neighborhood watch app that actually makes sense.
-Lost your cat? Saw something sketchy? Need help getting home? Post it here. Your neighbors will see it immediately.
+# Safe Haven
 
- What is Safe Haven?
-It's a web app where neighbors share what's happening in real-time.
-Think of it as your neighborhood's group chat, but organized. Instead of hundreds of messages flying by, everything is categorized, mapped, and easy to find.
-No algorithms deciding what you see. No ads. Just your neighbors and what's happening on your block.
+**Your neighborhood's safety network. Real-time updates when it matters most.**
 
- Why does this exist?
-The problem: Something happens in your neighborhood. By the time you hear about it on Nextdoor or the news, it's already old.
-The solution: Post it immediately. Everyone sees it. Everyone stays informed.
-That's it. That's the app.
+---
 
- Main Features
- Community Feed
-Where everything gets posted.
+## What is this?
 
-What it does: Shows all posts from your neighborhood in real-time
-Categories: Safety issues, lost pets, events, questions, accessibility reports
-Filters: Click a category to see only those posts
-How it works: Someone posts → Everyone sees it instantly
+Safe Haven is a web app where neighbors share what's happening right now. Someone trying car doors at 2 AM? Lost cat? Broken wheelchair ramp? Post it and everyone in your neighborhood sees it immediately.
 
-Example: Neighbor posts "Suspicious car on Oak Street at 2AM checking door handles." You see it immediately, lock your car, warn others.
+No algorithms. No ads. Just your block.
 
-Interactive Map
-See what's happening around you visually.
+---
 
-Color-coded pins: Red = safety, Blue = lost pets, Green = events, Purple = accessibility, Orange = questions
-Click pins: See post details and who posted it
-Wheelchair routes: Blue dashed lines show accessible paths with ramps and smooth pavement
-Live updates: New posts appear on the map instantly
+## The Problem We're Solving
 
-Example: You're planning a walk. Check the map for any safety concerns on your route. See the blue wheelchair paths if you need accessibility features.
+By the time you hear about neighborhood issues on Nextdoor or the news, it's already old news. We built Safe Haven so information spreads instantly when seconds count.
 
-📹 Live Camera Monitoring
-Watch what's happening right now.
+---
 
-6 live feeds: Real cameras streaming 24/7 (Times Square, parks, traffic, beaches)
-Auto-play: Feeds start automatically - no clicking needed
-Grid view: See all cameras at once
-Click to enlarge: Open any camera full-screen
+## Features
 
-Example: Check the park camera before taking your kids. See if it's crowded, if weather looks good, if anything seems off.
+### 📱 Community Feed
+**Real-time neighborhood updates**
+- Posts appear instantly
+- Filter by Safety, Lost Pets, Events, Questions, or Accessibility
+- Comment and mark posts as helpful
+- Desktop and mobile friendly
 
- Report with Camera
-Snap and report problems instantly.
+### 🗺️ Interactive Map
+**See what's happening visually**
+- Color-coded pins (Red = safety, Blue = pets, Green = events)
+- Blue dashed lines show wheelchair-accessible routes
+- Click pins to see full post details
+- Updates live as neighbors post
 
-Opens your camera: Phone or computer camera activates
-Take a photo: Capture the issue
-Pick category: Safety, vandalism, trash, traffic, other
-Add description: Explain what's happening
-Submit: Goes to the feed immediately
+### 📹 Live Cameras
+**24/7 monitoring**
+- 6 live camera feeds
+- Auto-play surveillance view
+- Times Square, parks, traffic, beaches
+- Click to expand any feed
 
-Example: See graffiti on the community center? Open the app, snap a photo, select "Vandalism," describe location, submit. Done in 30 seconds.
+### 📸 Quick Reports
+**Snap and share in 30 seconds**
+- Opens your phone/computer camera
+- Take a photo of the issue
+- Add category and description
+- Post immediately to feed
 
- Accessibility Mode
-Built for everyone, including people who need extra help.
- Voice Guidance
+### ♿ Accessibility Suite
+**Built for everyone**
 
-Turn it on: Everything gets read aloud
-Click anything: Hears the description
-Navigation: "Voice guidance enabled. I will now read important information aloud."
- Visual Modes
+**Voice Guidance:** Everything read aloud via Web Speech API  
+**High Contrast:** WCAG AAA compliant (21:1 contrast ratio)  
+**Large Text:** System-wide font scaling  
+**Walk Buddy System:** Request neighbors to walk you home safely  
+**Accessible Routes:** Find wheelchair ramps, elevators, smooth pavement
 
-High Contrast: Black background, white text (for low vision)
-Large Text: Makes everything bigger
-Screen Reader: Works with assistive technology
+### 🚨 Emergency Features
+- One-tap emergency button alerts nearby neighbors
+- Quick dial 911, poison control, crisis lines
+- Color-coded alerts (Red = critical, Orange = urgent)
 
-Walk Buddy System
+---
 
-Request a buddy: Need someone to walk home with?
-Post your route: "From Library to 123 Main St at 6:30 PM"
-Neighbors volunteer: "I can walk with you!"
-See active requests: Who needs help right now?
+## How It Works
 
-Example: You work late and don't feel safe walking home alone. Request a walk buddy. A neighbor who lives on your street volunteers. You walk together. Stay safe.
-♿ Wheelchair-Accessible Places
+1. **Sign up** with email or Google
+2. **Set your neighborhood** 
+3. **See what's happening** in your area
+4. **Post updates** when you see something
+5. **Stay informed** in real-time
 
-Shows local spots: Library, park, grocery store, bus stops
-Lists features: Wheelchair ramps, elevators, automatic doors, braille signs, wide aisles
-Get directions: Click to navigate there
-Voice readout: Hears all accessibility features
+---
 
-Example: New to the area and use a wheelchair? See which stores have accessible entrances, which parks have paved paths, which buses have ramps.
+## Built With
 
-Emergency Features
-When seconds count.
+- **Next.js** - Fast React framework
+- **Firebase** - Real-time database and authentication
+- **Leaflet** - Interactive maps
+- **Tailwind CSS** - Clean design system
+- **YouTube API** - Live camera feeds
 
-Big red button: Sends alert to all nearby neighbors
-Quick dial: One tap to call 911, poison control, crisis helplines
-Active alerts: See emergency notifications from your area
-Color-coded: Red = critical, Orange = urgent, Yellow = caution
+---
 
-Example: You hear someone screaming. Hit emergency button. All neighbors within 5 blocks get notified immediately. Someone nearby can help before police arrive.
+## What Makes It Different
 
-Post Details & Comments
-Full conversations, not just announcements.
+**No algorithm deciding what you see.** Posts appear chronologically. The most recent information is at the top.
 
-Click any post: Opens full details page
-Read everything: Complete description, all photos
-See comments: What neighbors are saying
-Add your thoughts: Comment, mark as helpful, share
-Back to feed: One click returns you
+**Accessibility first.** Voice guidance, high contrast, walk buddy matching. Not bolted on - built in from day one.
 
-Example: Post about car break-ins gets 12 comments with tips, security camera footage offers, and updates from police.
+**Privacy focused.** No tracking. No selling data. No ads. Just neighbors helping neighbors.
 
- Create Posts
-Two ways to post:
-Option 1: Full Form
+**Works everywhere.** Phone, tablet, desktop. iOS, Android, any browser.
 
-Add title (optional)
-Write description (required)
-Upload photos (up to 4)
-Set urgency (low, medium, high, emergency)
-Pick category
-Submit
+---
 
-Option 2: Quick Camera Report
+## Current Features
 
-Snap photo
-Add quick description
-Submit
+✅ User authentication (email/password + Google)  
+✅ Real-time post feed with filters  
+✅ Create posts with photos (up to 4)  
+✅ Interactive map with location pins  
+✅ Wheelchair-accessible route mapping  
+✅ 6 live camera streams  
+✅ Device camera for instant reporting  
+✅ Voice guidance and screen reader support  
+✅ Walk buddy matching system  
+✅ Emergency alert system  
+✅ Post comments and reactions  
+✅ Mobile responsive design  
 
-Both end up in the feed. Both work perfectly.
+---
 
-Design Philosophy
-Clean, not cluttered.
-We removed everything that doesn't need to be there. Big text. Lots of space. Clear buttons. No tricks.
-Inspired by companies like MetaLab who design products that feel human, not corporate.
-Colors:
+## Who It's For
 
-Stone grays (warm, not cold)
-Amber accents (friendly, approachable)
-Category colors (red=danger, green=safe, blue=info)
+- Neighbors who want real-time safety updates
+- Parents monitoring school zones
+- People with accessibility needs
+- Block watch organizers
+- Anyone tired of hearing about issues too late
 
-Buttons do what they say. No dark patterns. No manipulation. Click "Submit" and it submits. That's it.
+---
 
-💻 Technical Details
-What it's built with:
+## Design Philosophy
 
-Next.js + React: Fast, modern web framework
-Firebase: Database and backend (free tier works great)
-Tailwind CSS: Clean, consistent styling
-Leaflet: Interactive maps
-YouTube Embeds: Live camera streams
+**Clean, not cluttered.** Every element serves a purpose. No dark patterns.
 
-Posts:
-Create text posts
-Add up to 4 photos
-Pick category
-Set urgency level
-Delete your own posts
-Comment on posts
-Like posts (mark as helpful)
+**Fast and honest.** Sub-2-second load times. Buttons do what they say.
 
-Map:
-See all posts with locations
-Color-coded pins by category
-Wheelchair-accessible routes (blue dashed lines)
-Filter by category
-Filter by time range
+**Human-centered.** Built for real people, not engagement metrics.
 
-Cameras:
-6 real live streams
-Auto-play feeds
-Click to open full screen
-Report button on each camera
+Inspired by MetaLab's approach: purposeful design that respects users.
 
-Accessibility:
-Voice guidance (reads everything aloud)
-High contrast mode
-Large text mode
-Walk buddy requests and offers
-Wheelchair-accessible place finder
-Emergency alert button
+---
 
-Moderation:
-Report button on every post
-Flag inappropriate content
-Community guidelines built-in
+## What's Next
 
+- Push notifications for critical alerts
+- Direct messaging between neighbors  
+- Neighborhood verification system
+- Multi-language support
+- PWA installation (works like native app)
+- Historical crime data overlay
 
+---
 
-Who This Is For
-Perfect for:
-Neighbors who want to stay informed
-Parents monitoring school zone safety
-People with accessibility needs
-Block watch captains
-Community organizers
-Anyone tired of hearing about neighborhood stuff too late
+## The Goal
 
-
-The Core Idea
 Technology should help people connect, not replace connection.
-Use this app to coordinate. To warn. To ask for help. To offer help.
-But then close the app and go talk to your neighbors in person.
-That's the goal.
+
+Use Safe Haven to stay informed and coordinate. But then close the app and talk to your neighbors in person.
+
+That's the whole point.
+
+---
+**Stay safe. Stay connected. Stay human.**
